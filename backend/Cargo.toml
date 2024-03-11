@@ -1,0 +1,10 @@
+[package]
+name = "surreal-todo"
+version = "0.0.0"
+authors = ["Pandier"]
+edition = "2021"
+repository = "https://github.com/pandier/surreal-todo.git"
+license = "GPL-3.0-or-later"
+
+[dependencies]
+rocket = { version = "0.5", features = ["json"] }
