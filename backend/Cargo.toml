@@ -8,3 +8,6 @@ license = "GPL-3.0-or-later"
 
 [dependencies]
 rocket = { version = "0.5", features = ["json"] }
+surrealdb = "1.2"
+
+eyre = "0.6"

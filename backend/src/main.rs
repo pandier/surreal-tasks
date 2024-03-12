@@ -1,12 +1,24 @@
 #[macro_use]
 extern crate rocket;
 
-mod user;
+mod database;
 mod routes;
+mod user;
 
-pub use user::User;
+use eyre::{Context, Result};
+pub use user::{User, PublicUser};
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount("/users", routes![routes::user::get])
+#[rocket::main]
+async fn main() -> Result<()> {
+    let database = database::init()
+        .await
+        .wrap_err("Failed to initialize database")?;
+
+    let _ = rocket::build()
+        .manage(database)
+        .mount("/users", routes![routes::user::get])
+        .launch()
+        .await?;
+
+    Ok(())
 }
