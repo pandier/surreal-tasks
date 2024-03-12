@@ -11,3 +11,4 @@ rocket = { version = "0.5", features = ["json"] }
 surrealdb = "1.2"
 
 eyre = "0.6"
+color-eyre = { version = "0.6.2", default-features = false }

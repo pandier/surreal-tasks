@@ -2,14 +2,18 @@
 extern crate rocket;
 
 mod database;
+mod error;
 mod routes;
 mod user;
 
-use eyre::{Context, Result};
-pub use user::{User, PublicUser};
+pub use error::{RouteError, RouteResult};
+use eyre::{Result, WrapErr};
+pub use user::{PublicUser, User};
 
 #[rocket::main]
 async fn main() -> Result<()> {
+    color_eyre::install()?;
+
     let database = database::init()
         .await
         .wrap_err("Failed to initialize database")?;

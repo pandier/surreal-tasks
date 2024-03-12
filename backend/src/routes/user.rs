@@ -1,19 +1,17 @@
-use rocket::{response::status, serde::json::Json, State};
+use eyre::Context;
+use rocket::{serde::json::Json, State};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::{PublicUser, User};
+use crate::{PublicUser, RouteResult, User};
 
 #[get("/<id>")]
 pub async fn get(
     id: &str,
     database: &State<Surreal<Client>>,
-) -> Result<Result<Json<PublicUser>, status::NotFound<()>>, ()> {
-    database
+) -> RouteResult<Option<Json<PublicUser>>> {
+    Ok(database
         .select(("user", id))
         .await
-        .map_err(|_| ())
-        .map(|user: Option<User>| {
-            user.ok_or(status::NotFound(()))
-                .map(|user| Json(user.into()))
-        })
+        .wrap_err("failed to select user from database")?
+        .map(|user: User| Json(user.into())))
 }
