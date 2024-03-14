@@ -4,12 +4,12 @@ extern crate rocket;
 mod catchers;
 mod database;
 mod error;
+mod model;
 mod routes;
-mod user;
 
 pub use error::{RouteError, RouteResult};
 use eyre::{Result, WrapErr};
-pub use user::{PublicUser, User};
+pub use model::user::{PublicUser, User};
 
 #[rocket::main]
 async fn main() -> Result<()> {
