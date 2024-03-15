@@ -1,4 +1,4 @@
-use crate::{Auth, RouteResult, User};
+use crate::{Auth, RouteError, RouteResult, User};
 use eyre::Context;
 use rocket::{http::Status, serde::json::Json, State};
 use surrealdb::{engine::remote::ws::Client, Surreal};
@@ -13,7 +13,7 @@ pub async fn signup(auth: Json<Auth>, database: &State<Surreal<Client>>) -> Rout
         .wrap_err("failed to query user")?
         .is_some()
     {
-        return Ok(Status::BadRequest);
+        return Err(RouteError::BadRequest("user_already_exists".into()));
     }
 
     database

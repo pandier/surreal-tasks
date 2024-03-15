@@ -10,6 +10,7 @@ license = "GPL-3.0-or-later"
 rocket = { version = "0.5", features = ["json"] }
 surrealdb = "1.3"
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 eyre = "0.6"
 color-eyre = { version = "0.6", default-features = false }

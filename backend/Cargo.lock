@@ -3122,6 +3122,7 @@ dependencies = [
  "eyre",
  "rocket",
  "serde",
+ "serde_json",
  "surrealdb",
 ]
 
