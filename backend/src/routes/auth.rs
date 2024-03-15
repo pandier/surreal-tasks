@@ -5,12 +5,14 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 
 #[post("/signup", data = "<auth>")]
 pub async fn signup(auth: Json<Auth>, database: &State<Surreal<Client>>) -> RouteResult<Status> {
-    let existing: Option<User> = database
+    if database
         .query("SELECT * FROM user WHERE username = $username")
         .bind(("username", &auth.username))
         .await?
-        .take(0)?;
-    if existing.is_some() {
+        .take::<Option<User>>(0)
+        .wrap_err("failed to query user")?
+        .is_some()
+    {
         return Ok(Status::BadRequest);
     }
 
