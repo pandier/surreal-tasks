@@ -3115,6 +3115,7 @@ dependencies = [
  "color-eyre",
  "eyre",
  "rocket",
+ "serde",
  "surrealdb",
 ]
 
