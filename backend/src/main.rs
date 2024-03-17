@@ -6,6 +6,7 @@ mod database;
 mod error;
 mod model;
 mod routes;
+mod settings;
 
 pub use error::{RouteError, RouteResult};
 use eyre::{Result, WrapErr};
@@ -13,12 +14,15 @@ pub use model::{
     auth::Auth,
     user::{PublicUser, User},
 };
+pub use settings::Settings;
 
 #[rocket::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
 
-    let database = database::init()
+    let settings = Settings::from_env();
+
+    let database = database::init(&settings)
         .await
         .wrap_err("Failed to initialize database")?;
 
