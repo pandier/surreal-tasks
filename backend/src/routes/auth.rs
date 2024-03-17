@@ -17,7 +17,11 @@ pub async fn signup(auth: Json<Auth>, database: &State<Surreal<Client>>) -> Rout
     }
 
     database
-        .query("CREATE user SET username = $username, password = $password")
+        .query(
+            "CREATE user SET
+                username = $username,
+                password = crypto::argon2::generate($password);",
+        )
         .bind(("username", &auth.username))
         .bind(("password", &auth.password))
         .await?
