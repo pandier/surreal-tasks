@@ -27,6 +27,7 @@ async fn main() -> Result<()> {
         .wrap_err("Failed to initialize database")?;
 
     let _ = rocket::build()
+        .manage(settings)
         .manage(database)
         .register("/", catchers![catchers::default_catcher])
         .mount("/users", routes![routes::user::get])
