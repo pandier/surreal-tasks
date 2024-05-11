@@ -1,10 +1,16 @@
-use crate::{Auth, RouteError, RouteResult, User};
-use eyre::Context;
-use rocket::{http::Status, serde::json::Json, State};
+use crate::{Auth, Claims, RouteError, RouteResult, Settings, User};
+use eyre::{Context, ContextCompat};
+use jsonwebtoken::get_current_timestamp;
+use rocket::{serde::json::Json, State};
+use serde_json::{json, Value};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 #[post("/signup", data = "<auth>")]
-pub async fn signup(auth: Json<Auth>, database: &State<Surreal<Client>>) -> RouteResult<Status> {
+pub async fn signup(
+    auth: Json<Auth>,
+    settings: &State<Settings>,
+    database: &State<Surreal<Client>>,
+) -> RouteResult<Json<Value>> {
     if database
         .query("SELECT * FROM user WHERE username = $username")
         .bind(("username", &auth.username))
@@ -16,7 +22,7 @@ pub async fn signup(auth: Json<Auth>, database: &State<Surreal<Client>>) -> Rout
         return Err(RouteError::BadRequest("user_already_exists".into()));
     }
 
-    database
+    let user = database
         .query(
             "CREATE user SET
                 username = $username,
@@ -26,6 +32,22 @@ pub async fn signup(auth: Json<Auth>, database: &State<Surreal<Client>>) -> Rout
         .bind(("password", &auth.password))
         .await?
         .take::<Option<User>>(0)
-        .wrap_err("failed to create user")?;
-    Ok(Status::Ok)
+        .wrap_err("failed to create user")?
+        .wrap_err("received None after user creation")?;
+
+    let claims = Claims {
+        sub: user.id.id.to_raw(),
+        username: user.username,
+        exp: get_current_timestamp() + 604800,
+    };
+
+    let token = jsonwebtoken::encode(
+        &jsonwebtoken::Header::default(),
+        &claims,
+        &jsonwebtoken::EncodingKey::from_secret(settings.jwt_secret.as_ref()),
+    )?;
+
+    Ok(Json(json!({
+        "token": token
+    })))
 }

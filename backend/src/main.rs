@@ -11,7 +11,7 @@ mod settings;
 pub use error::{RouteError, RouteResult};
 use eyre::{Result, WrapErr};
 pub use model::{
-    auth::Auth,
+    auth::{Auth, Claims},
     user::{PublicUser, User},
 };
 pub use settings::Settings;

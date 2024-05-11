@@ -5,6 +5,7 @@ pub struct Settings {
     pub surreal_password: String,
     pub surreal_namespace: String,
     pub surreal_database: String,
+    pub jwt_secret: String,
 }
 
 impl Settings {
@@ -14,6 +15,7 @@ impl Settings {
             surreal_password: env::var("SURREAL_PASSWORD").unwrap_or("root".into()),
             surreal_namespace: env::var("SURREAL_NAMESPACE").unwrap_or("io.github.pandier".into()),
             surreal_database: env::var("SURREAL_DATABASE").unwrap_or("surrealtasks".into()),
+            jwt_secret: env::var("JWT_SECRET").unwrap_or("REPLACEME".into()),
         }
     }
 }
