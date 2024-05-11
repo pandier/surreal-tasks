@@ -15,7 +15,7 @@ pub async fn signup(
         .bind(("username", &auth.username))
         .await?
         .take::<Option<User>>(0)
-        .wrap_err("failed to query user")?
+        .wrap_err("Failed to query user")?
         .is_some()
     {
         return Err(RouteError::BadRequest("user_already_exists".into()));
@@ -31,8 +31,8 @@ pub async fn signup(
         .bind(("password", &auth.password))
         .await?
         .take::<Option<User>>(0)
-        .wrap_err("failed to create user")?
-        .wrap_err("received None after user creation")?;
+        .wrap_err("Failed to create user")?
+        .wrap_err("Received None after user creation")?;
 
     let claims = Claims {
         sub: user.id.id.to_raw(),

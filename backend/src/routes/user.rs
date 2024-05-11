@@ -12,6 +12,6 @@ pub async fn get(
     Ok(database
         .select(("user", id))
         .await
-        .wrap_err("failed to select user from database")?
+        .wrap_err("Failed to select user from database")?
         .map(|user: User| Json(user.into())))
 }
