@@ -1,6 +1,5 @@
 use crate::{Auth, Claims, RouteError, RouteResult, Settings, User};
 use eyre::{Context, ContextCompat};
-use jsonwebtoken::get_current_timestamp;
 use rocket::{serde::json::Json, State};
 use serde_json::{json, Value};
 use surrealdb::{engine::remote::ws::Client, Surreal};
@@ -38,7 +37,7 @@ pub async fn signup(
     let claims = Claims {
         sub: user.id.id.to_raw(),
         username: user.username,
-        exp: get_current_timestamp() + 604800,
+        exp: jsonwebtoken::get_current_timestamp() + 604800,
     };
 
     let token = jsonwebtoken::encode(
