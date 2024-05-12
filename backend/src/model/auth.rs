@@ -1,12 +1,12 @@
 use rocket::{
     http::Status,
-    outcome::try_outcome,
+    outcome::{try_outcome, IntoOutcome},
     request::{self, FromRequest},
     Request, State,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{Settings, User};
+use crate::{auth, Settings, User};
 
 #[derive(Debug, Deserialize)]
 pub struct Auth {
@@ -42,15 +42,7 @@ impl<'r> FromRequest<'r> for Claims {
             None => rocket::outcome::Outcome::Error((Status::Unauthorized, ())),
             Some(key) => {
                 let token = key.trim_start_matches("Bearer").trim();
-
-                match jsonwebtoken::decode::<Claims>(
-                    token,
-                    &jsonwebtoken::DecodingKey::from_secret(settings.jwt_secret.as_ref()),
-                    &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::default()),
-                ) {
-                    Ok(claims) => rocket::outcome::Outcome::Success(claims.claims),
-                    Err(_) => rocket::outcome::Outcome::Error((Status::Unauthorized, ())),
-                }
+                auth::authenticate(settings, token).or_error((Status::Unauthorized, ()))
             }
         }
     }
