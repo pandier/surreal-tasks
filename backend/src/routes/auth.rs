@@ -1,4 +1,4 @@
-use crate::{Auth, Claims, RouteError, RouteResult, Settings, User};
+use crate::{auth::create_token, Auth, RouteError, RouteResult, Settings, User};
 use eyre::{Context, ContextCompat};
 use rocket::{serde::json::Json, State};
 use serde_json::{json, Value};
@@ -34,17 +34,7 @@ pub async fn signup(
         .wrap_err("Failed to create user")?
         .wrap_err("Received None after user creation")?;
 
-    let claims = Claims {
-        sub: user.id.id.to_raw(),
-        username: user.username,
-        exp: jsonwebtoken::get_current_timestamp() + 604800,
-    };
-
-    let token = jsonwebtoken::encode(
-        &jsonwebtoken::Header::default(),
-        &claims,
-        &jsonwebtoken::EncodingKey::from_secret(settings.jwt_secret.as_ref()),
-    )?;
+    let token = create_token(settings, &user)?;
 
     Ok(Json(json!({
         "token": token

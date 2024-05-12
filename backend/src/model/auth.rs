@@ -6,7 +6,7 @@ use rocket::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::Settings;
+use crate::{Settings, User};
 
 #[derive(Debug, Deserialize)]
 pub struct Auth {
@@ -19,6 +19,16 @@ pub struct Claims {
     pub sub: String,
     pub username: String,
     pub exp: u64,
+}
+
+impl From<&User> for Claims {
+    fn from(value: &User) -> Self {
+        Self {
+            sub: value.id.id.to_raw(),
+            username: value.username.to_owned(),
+            exp: jsonwebtoken::get_current_timestamp() + 604800,
+        }
+    }
 }
 
 #[rocket::async_trait]
