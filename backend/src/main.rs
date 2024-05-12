@@ -30,7 +30,10 @@ async fn main() -> Result<()> {
         .manage(settings)
         .manage(database)
         .register("/", catchers![catchers::default_catcher])
-        .mount("/users", routes![routes::user::get])
+        .mount(
+            "/users",
+            routes![routes::user::get, routes::user::get_current],
+        )
         .mount("/auth", routes![routes::auth::signup])
         .launch()
         .await?;
