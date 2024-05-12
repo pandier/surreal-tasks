@@ -50,9 +50,8 @@ pub async fn login(
     let mut result = database
         .query(
             "LET $user = (SELECT * FROM ONLY user WHERE username = $username LIMIT 1);
-            RETURN $user;
-            IF $user != NONE THEN
-                RETURN crypto::argon2::compare($user.password, $password)
+            IF $user != NONE && crypto::argon2::compare($user.password, $password) THEN
+                RETURN $user
             END",
         )
         .bind(("username", &auth.username))
@@ -61,12 +60,7 @@ pub async fn login(
 
     let user = result
         .take::<Option<User>>(1)?
-        .ok_or(RouteError::BadRequest("unknown_user".into()))?;
-
-    let authenticated = result.take::<Option<bool>>(2)?.unwrap_or(false);
-    if !authenticated {
-        return Err(RouteError::BadRequest("invalid_password".into()));
-    }
+        .ok_or(RouteError::BadRequest("invalid_login".into()))?;
 
     let token = create_token(settings, &user)?;
 
