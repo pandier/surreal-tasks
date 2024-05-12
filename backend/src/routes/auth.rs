@@ -40,3 +40,37 @@ pub async fn signup(
         "token": token
     })))
 }
+
+#[post("/login", data = "<auth>")]
+pub async fn login(
+    auth: Json<Auth>,
+    settings: &State<Settings>,
+    database: &State<Surreal<Client>>,
+) -> RouteResult<Json<Value>> {
+    let mut result = database
+        .query(
+            "LET $user = (SELECT * FROM ONLY user WHERE username = $username LIMIT 1);
+            RETURN $user;
+            IF $user != NONE THEN
+                RETURN crypto::argon2::compare($user.password, $password)
+            END",
+        )
+        .bind(("username", &auth.username))
+        .bind(("password", &auth.password))
+        .await?;
+
+    let user = result
+        .take::<Option<User>>(1)?
+        .ok_or(RouteError::BadRequest("unknown_user".into()))?;
+
+    let authenticated = result.take::<Option<bool>>(2)?.unwrap_or(false);
+    if !authenticated {
+        return Err(RouteError::BadRequest("invalid_password".into()));
+    }
+
+    let token = create_token(settings, &user)?;
+
+    Ok(Json(json!({
+        "token": token
+    })))
+}

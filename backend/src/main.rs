@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
             "/users",
             routes![routes::user::get, routes::user::get_current],
         )
-        .mount("/auth", routes![routes::auth::signup])
+        .mount("/auth", routes![routes::auth::signup, routes::auth::login])
         .launch()
         .await?;
 
