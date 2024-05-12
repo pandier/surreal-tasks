@@ -1,7 +1,8 @@
 use rocket::{
     http::Status,
+    outcome::try_outcome,
     request::{self, FromRequest},
-    Request,
+    Request, State,
 };
 use serde::{Deserialize, Serialize};
 
@@ -25,19 +26,20 @@ impl<'r> FromRequest<'r> for Claims {
     type Error = ();
 
     async fn from_request(request: &'r Request<'_>) -> request::Outcome<Self, ()> {
+        let settings = try_outcome!(request.guard::<&State<Settings>>().await);
+
         match request.headers().get_one("Authorization") {
-            None => rocket::outcome::Outcome::Error((Status::Unauthorized, ())),
+            None => rocket::outcome::Outcome::Forward(Status::Unauthorized),
             Some(key) => {
                 let token = key.trim_start_matches("Bearer").trim();
-                let secret = Settings::from_env().jwt_secret; // TODO: Find a better way to do this
 
                 match jsonwebtoken::decode::<Claims>(
                     token,
-                    &jsonwebtoken::DecodingKey::from_secret(secret.as_ref()),
+                    &jsonwebtoken::DecodingKey::from_secret(settings.jwt_secret.as_ref()),
                     &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::default()),
                 ) {
                     Ok(claims) => rocket::outcome::Outcome::Success(claims.claims),
-                    Err(_) => rocket::outcome::Outcome::Error((Status::Unauthorized, ())),
+                    Err(_) => rocket::outcome::Outcome::Forward(Status::Unauthorized),
                 }
             }
         }
