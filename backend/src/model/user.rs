@@ -28,7 +28,7 @@ impl<'r> FromRequest<'r> for User {
             .await
             .ok()
             .and_then(|user| user)
-            .or_forward(Status::Unauthorized)
+            .or_error((Status::Unauthorized, ()))
     }
 }
 

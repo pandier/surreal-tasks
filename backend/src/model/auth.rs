@@ -29,7 +29,7 @@ impl<'r> FromRequest<'r> for Claims {
         let settings = try_outcome!(request.guard::<&State<Settings>>().await);
 
         match request.headers().get_one("Authorization") {
-            None => rocket::outcome::Outcome::Forward(Status::Unauthorized),
+            None => rocket::outcome::Outcome::Error((Status::Unauthorized, ())),
             Some(key) => {
                 let token = key.trim_start_matches("Bearer").trim();
 
@@ -39,7 +39,7 @@ impl<'r> FromRequest<'r> for Claims {
                     &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::default()),
                 ) {
                     Ok(claims) => rocket::outcome::Outcome::Success(claims.claims),
-                    Err(_) => rocket::outcome::Outcome::Forward(Status::Unauthorized),
+                    Err(_) => rocket::outcome::Outcome::Error((Status::Unauthorized, ())),
                 }
             }
         }
