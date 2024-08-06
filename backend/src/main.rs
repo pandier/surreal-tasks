@@ -13,6 +13,7 @@ pub use error::{RouteError, RouteResult};
 use eyre::{Result, WrapErr};
 pub use model::{
     auth::{Auth, Claims},
+    task::{CreateTask, Task},
     user::{PublicUser, User},
 };
 pub use settings::Settings;
@@ -36,6 +37,10 @@ async fn main() -> Result<()> {
             routes![routes::user::get, routes::user::get_current],
         )
         .mount("/auth", routes![routes::auth::signup, routes::auth::login])
+        .mount(
+            "/tasks",
+            routes![routes::task::list, routes::task::get, routes::task::create],
+        )
         .launch()
         .await?;
 
