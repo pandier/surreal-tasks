@@ -39,7 +39,12 @@ async fn main() -> Result<()> {
         .mount("/auth", routes![routes::auth::signup, routes::auth::login])
         .mount(
             "/tasks",
-            routes![routes::task::list, routes::task::get, routes::task::create],
+            routes![
+                routes::task::list,
+                routes::task::get,
+                routes::task::create,
+                routes::task::delete
+            ],
         )
         .launch()
         .await?;
